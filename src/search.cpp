@@ -957,6 +957,13 @@ Value Worker::quiesce(const Position& pos, Stack* ss, Value alpha, Value beta, i
         if (!tt_data) {
             m_searcher.tt.store(pos, ply, raw_eval, Move::none(), -VALUE_INF, 0, ttpv, Bound::None);
         }
+
+        // Reuse TT score as a better positional evaluation
+        if (tt_data
+            && tt_data->bound() != Bound::None
+            && tt_data->bound() != (tt_data->score > ss->static_eval ? Bound::Upper : Bound::Lower)) {
+            static_eval = tt_data->score;
+        }
     }
 
     // Stand pat
